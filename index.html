@@ -225,8 +225,10 @@
       </div>
 
       <div id="admin-stats-area" class="hidden">
-        <div class="flex gap-2 mb-3">
+        <div class="flex gap-2 mb-3 flex-wrap">
           <button onclick="loadVoteStats()" class="bg-orange-500 text-white px-4 py-2 rounded-xl font-bold">重新整理票數</button>
+          <button onclick="exportAllVotes()" class="bg-emerald-600 text-white px-4 py-2 rounded-xl font-bold">匯出全部投票</button>
+          <button onclick="clearAllVotes()" class="bg-red-600 text-white px-4 py-2 rounded-xl font-bold">刪除全部投票</button>
           <button onclick="adminLogout()" class="bg-slate-600 text-white px-4 py-2 rounded-xl font-bold">登出</button>
         </div>
         <div class="overflow-x-auto">
@@ -249,7 +251,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDG552C-No6-tw0bvtpM6ASdIF7BMtLtFg",
@@ -374,19 +376,24 @@
       openModal('modal-confirm');
     };
 
+    const withTimeout = (promise, ms = 12000) => Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('投票送出逾時，請檢查網路後再試一次。')), ms))
+    ]);
+
     window.submitVote = async () => {
       const cand = candidatesData.find(c => c.id === selectedCandidateId);
       const btn = document.getElementById('btn-final-submit');
       btn.disabled = true;
       btn.textContent = '傳送中...';
       try {
-        await addDoc(collection(db, 'votes'), {
+        await withTimeout(addDoc(collection(db, 'votes'), {
           candidateNumber: cand.id,
           mayorName: cand.mayor.chars.join(''),
           viceName: cand.vice.chars.join(''),
           className: cand.class,
           createdAt: serverTimestamp()
-        });
+        }));
         closeModal('modal-confirm');
         openModal('modal-success');
         fireConfetti();
@@ -452,6 +459,47 @@
 
     window.adminLogout = async () => {
       await signOut(auth);
+    };
+
+    window.exportAllVotes = async () => {
+      try {
+        const snap = await getDocs(collection(db, 'votes'));
+        const rows = [['candidateNumber', 'mayorName', 'viceName', 'className', 'createdAt', 'docId']];
+        snap.forEach(d => {
+          const v = d.data();
+          const createdAt = v.createdAt?.toDate ? v.createdAt.toDate().toISOString() : '';
+          rows.push([v.candidateNumber ?? '', v.mayorName ?? '', v.viceName ?? '', v.className ?? '', createdAt, d.id]);
+        });
+        const csv = rows.map(r => r.map(val => `"${String(val).replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `votes_export_${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        alert(`匯出失敗：${err.message}`);
+      }
+    };
+
+    window.clearAllVotes = async () => {
+      if (!auth.currentUser) {
+        alert('請先以管理者登入。');
+        return;
+      }
+      const ok = confirm('確定要刪除所有投票結果嗎？此動作無法復原。');
+      if (!ok) return;
+      try {
+        const snap = await getDocs(collection(db, 'votes'));
+        await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
+        await loadVoteStats();
+        alert('已刪除全部投票結果。');
+      } catch (err) {
+        alert(`刪除失敗：${err.message}`);
+      }
     };
 
     async function loadVoteStats() {
