@@ -36,9 +36,9 @@
     .zhuyin-container { display:inline-flex; flex-direction:row; flex-wrap:wrap; align-items:center; justify-content:center; gap:0 0.12em; width:max-content; max-width:100%; }
     .word-group { display:flex; flex-direction:row; align-items:center; justify-content:center; }
     .hanzi-track { font-size:1em; line-height:1; font-weight:900; }
-    .zhuyin-track { writing-mode:vertical-rl; text-orientation:upright; display:grid; font-size:0.35em; grid-template-rows:0.8em 1em; align-items:center; justify-items:center; color:#334155; font-weight:900; margin-left:0.05em; }
+    .zhuyin-track { writing-mode:vertical-rl; text-orientation:upright; display:grid; font-size:0.35em; grid-template-rows:1em 1em; align-items:center; justify-items:center; color:#334155; font-weight:900; margin-left:0.05em; overflow:visible; }
     .zy-char,.zy-light { line-height:1; }
-    .zy-tone { font-size:0.8em; transform:translateY(-0.82em); }
+    .zy-tone { font-size:0.8em; transform:translateY(-0.2em); }
     .candidate-card {
       background: rgba(255,255,255,0.92);
       border: 2px solid var(--card-border);
@@ -128,6 +128,7 @@
       .candidate-card { border-radius: 18px; padding: 10px !important; }
       .candidate-card .text-2xl { font-size: 1.25rem; }
       .candidate-card img { width: 4.25rem !important; height: 4.25rem !important; }
+      .candidate-card .zhuyin-track { font-size: 0.42em; }
       footer { margin-top: 12px !important; }
       #btn-main-vote { padding: 10px 40px !important; font-size: 1.5rem !important; }
       .sticker-right { width: 110px; right: 10px; bottom: 66px; }
