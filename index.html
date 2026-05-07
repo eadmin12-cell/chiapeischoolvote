@@ -36,9 +36,9 @@
     .zhuyin-container { display:inline-flex; flex-direction:row; flex-wrap:wrap; align-items:center; justify-content:center; gap:0 0.12em; width:max-content; max-width:100%; }
     .word-group { display:flex; flex-direction:row; align-items:center; justify-content:center; }
     .hanzi-track { font-size:1em; line-height:1; font-weight:900; }
-    .zhuyin-track { writing-mode:vertical-rl; text-orientation:upright; display:grid; font-size:0.35em; grid-template-rows:1em 1em; align-items:center; justify-items:center; color:#334155; font-weight:900; margin-left:0.05em; overflow:visible; }
-    .zy-char,.zy-light { line-height:1; }
-    .zy-tone { font-size:0.8em; position:relative; top:-0.2em; }
+    .zhuyin-track { display:flex; flex-direction:column; font-size:0.35em; align-items:flex-start; color:#334155; font-weight:900; margin-left:0.05em; width:2em; }
+    .zy-char,.zy-light { line-height:1; position:relative; display:flex; align-items:center; justify-content:center; width:1em; }
+    .zy-tone { font-size:0.8em; position:absolute; left:100%; top:-0.2em; white-space:nowrap; }
     .candidate-card {
       background: rgba(255,255,255,0.92);
       border: 2px solid var(--card-border);
@@ -303,16 +303,15 @@
         if (!char) continue;
         const { chars, tone, type } = parseZhuyin(zhuyin);
         if (chars.length === 0 && tone === '') { html += `<div class="word-group"><div class="hanzi-track">${char}</div></div>`; continue; }
-        let zhuyinCells = [], colIndex = 1;
+        let zhuyinCells = [];
         const slotsCount = chars.length + (type === 'light' ? 1 : 0);
         const currentSpacing = Math.max(0.4, slotsCount > 1 ? zhuyinSpacing - (slotsCount - 1) * zhuyinSqueeze : zhuyinSpacing);
-        if (type === 'light') { zhuyinCells.push(`<div class="zy-light" style="grid-row:2;grid-column:${colIndex};">${tone}</div>`); colIndex++; }
+        if (type === 'light') { zhuyinCells.push(`<div class="zy-light" style="height:${currentSpacing.toFixed(2)}em;">${tone}</div>`); }
         chars.forEach((c, idx) => {
-          zhuyinCells.push(`<div class="zy-char" style="grid-row:2;grid-column:${colIndex};">${c}</div>`);
-          if (idx === chars.length - 1 && type === 'standard') zhuyinCells.push(`<div class="zy-tone" style="grid-row:1;grid-column:${colIndex};">${tone}</div>`);
-          colIndex++;
+          let toneHtml = (idx === chars.length - 1 && type === 'standard') ? `<div class="zy-tone">${tone}</div>` : '';
+          zhuyinCells.push(`<div class="zy-char" style="height:${currentSpacing.toFixed(2)}em;">${c}${toneHtml}</div>`);
         });
-        const zhuyinTrack = zhuyinCells.length > 0 ? `<div class="zhuyin-track" style="grid-auto-columns:${currentSpacing.toFixed(2)}em;">${zhuyinCells.join('')}</div>` : '';
+        const zhuyinTrack = zhuyinCells.length > 0 ? `<div class="zhuyin-track">${zhuyinCells.join('')}</div>` : '';
         html += `<div class="word-group"><div class="hanzi-track">${char}</div>${zhuyinTrack}</div>`;
       }
       return `${html}</div>`;
