@@ -1,0 +1,15 @@
+<svg width="260" height="180" viewBox="0 0 260 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="p" x="0" y="0" width="260" height="180" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#0ea5e9" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  <g filter="url(#p)">
+    <rect x="20" y="60" width="170" height="50" rx="25" fill="#38BDF8" stroke="#0284C7" stroke-width="6"/>
+    <rect x="45" y="72" width="110" height="8" rx="4" fill="#E0F2FE"/>
+    <rect x="45" y="90" width="86" height="8" rx="4" fill="#E0F2FE"/>
+    <path d="M190 60L238 85L190 110V60Z" fill="#FCD34D" stroke="#F59E0B" stroke-width="6"/>
+    <path d="M238 85L252 85" stroke="#334155" stroke-width="7" stroke-linecap="round"/>
+    <rect x="8" y="60" width="24" height="50" rx="12" fill="#F9A8D4" stroke="#EC4899" stroke-width="6"/>
+  </g>
+</svg>

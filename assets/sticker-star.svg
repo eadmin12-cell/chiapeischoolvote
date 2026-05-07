@@ -1,0 +1,15 @@
+<svg width="220" height="220" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="s" x="0" y="0" width="220" height="220" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#f59e0b" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <g filter="url(#s)">
+    <path d="M110 20L130 78L192 78L142 114L160 176L110 138L60 176L78 114L28 78L90 78L110 20Z" fill="#FDE68A" stroke="#F59E0B" stroke-width="8"/>
+    <circle cx="88" cy="98" r="8" fill="#334155"/>
+    <circle cx="132" cy="98" r="8" fill="#334155"/>
+    <path d="M86 128C93 141 127 141 134 128" stroke="#334155" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="72" cy="122" r="6" fill="#FB7185"/>
+    <circle cx="148" cy="122" r="6" fill="#FB7185"/>
+  </g>
+</svg>
