@@ -120,6 +120,30 @@
       line-height: 1.08;
     }
     .screen-wrap { width: 100%; max-width: 1280px; margin: 0 auto; }
+    .pin-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      border: 2px solid #94a3b8;
+      background: #e2e8f0;
+    }
+    .pin-dot.filled {
+      border-color: #0f766e;
+      background: #14b8a6;
+    }
+    .pin-key {
+      border: 2px solid #bae6fd;
+      border-radius: 14px;
+      background: #ffffff;
+      font-size: 1.7rem;
+      font-weight: 900;
+      color: #0f172a;
+      padding: 10px 0;
+    }
+    .pin-key:active {
+      transform: scale(0.98);
+      background: #f0fdfa;
+    }
     @media (min-width: 900px) and (orientation: landscape) {
       body { padding: 12px 20px; }
       header { margin-bottom: 10px !important; }
@@ -207,8 +231,19 @@
   </div>
 
   <div id="modal-success" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white hidden-fade">
-    <h1 class="text-6xl font-black text-emerald-600 mb-5">完成投票</h1>
-    <p class="text-2xl text-slate-500">即將回到首頁...</p>
+    <h1 class="text-6xl font-black text-emerald-600 mb-3">完成投票</h1>
+    <p class="text-xl text-slate-500 mb-6">請交給旁邊同學或老師按下完成</p>
+    <button onclick="resetSystem()" class="bg-teal-700 hover:bg-teal-800 text-white text-2xl font-black py-3 px-8 rounded-2xl shadow-lg">投票完成</button>
+  </div>
+
+  <div id="modal-vote-gate" class="fixed inset-0 z-[130] flex items-center justify-center bg-slate-900/65 show-fade">
+    <div class="glass-modal p-6 rounded-3xl w-11/12 max-w-md text-center">
+      <h2 class="text-3xl font-black text-slate-800 mb-2">領票 / 開始投票</h2>
+      <p class="text-slate-600 mb-4">請輸入密碼開始投票</p>
+      <div id="start-pin-dots" class="flex justify-center gap-2 mb-3"></div>
+      <p id="start-pin-msg" class="text-red-600 min-h-[24px] mb-2 font-bold"></p>
+      <div id="start-keypad" class="grid grid-cols-3 gap-2"></div>
+    </div>
   </div>
 
   <div id="modal-admin" class="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 hidden-fade">
@@ -280,7 +315,9 @@
       return filename.replace(/\.(png|jpeg)$/i, '.jpg');
     }
 
+    const VOTE_PIN = '203608';
     let selectedCandidateId = null;
+    let startPinInput = '';
 
     const parseZhuyin = (str) => {
       if (!str) return { chars: [], tone: '', type: '' };
@@ -398,7 +435,6 @@
         closeModal('modal-confirm');
         openModal('modal-success');
         fireConfetti();
-        setTimeout(resetSystem, 2500);
       } catch (err) {
         alert(`投票失敗：${err.message}`);
       } finally {
@@ -411,7 +447,9 @@
       selectedCandidateId = null;
       renderGrid();
       closeModal('modal-success');
+      showVoteGate();
     }
+    window.resetSystem = resetSystem;
 
     function openModal(id) {
       const modal = document.getElementById(id);
@@ -537,6 +575,8 @@
     renderGrid();
     initAutoZhuyin();
     initParticles();
+    initPinPads();
+    showVoteGate();
 
     function initParticles() {
       const layer = document.getElementById('particle-layer');
@@ -555,6 +595,66 @@
         layer.appendChild(orb);
       }
     }
+
+    function showVoteGate() {
+      startPinInput = '';
+      updatePinDots('start');
+      document.getElementById('start-pin-msg').textContent = '';
+      const modal = document.getElementById('modal-vote-gate');
+      modal.classList.remove('hidden-fade');
+      modal.classList.add('show-fade');
+    }
+
+    function hideVoteGate() {
+      closeModal('modal-vote-gate');
+    }
+
+    function initPinPads() {
+      renderPinDots('start');
+      renderKeypad('start-keypad', onStartPinKey);
+    }
+
+    function renderPinDots(type) {
+      const root = document.getElementById(`${type}-pin-dots`);
+      root.innerHTML = Array.from({ length: VOTE_PIN.length }, () => '<div class="pin-dot"></div>').join('');
+    }
+
+    function updatePinDots(type) {
+      const value = startPinInput;
+      const dots = document.querySelectorAll(`#${type}-pin-dots .pin-dot`);
+      dots.forEach((dot, idx) => {
+        dot.classList.toggle('filled', idx < value.length);
+      });
+    }
+
+    function renderKeypad(rootId, handler) {
+      const root = document.getElementById(rootId);
+      const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '清除', '0', '刪除'];
+      root.innerHTML = keys.map(k => `<button class="pin-key" data-key="${k}">${k}</button>`).join('');
+      root.querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => handler(btn.dataset.key)));
+    }
+
+    function pushPinChar(type, key) {
+      if (key === '清除') startPinInput = '';
+      else if (key === '刪除') startPinInput = startPinInput.slice(0, -1);
+      else if (startPinInput.length < VOTE_PIN.length) startPinInput += key;
+      updatePinDots(type);
+    }
+
+    function onStartPinKey(key) {
+      pushPinChar('start', key);
+      if (startPinInput.length < VOTE_PIN.length) return;
+      if (startPinInput === VOTE_PIN) {
+        hideVoteGate();
+        startPinInput = '';
+        updatePinDots('start');
+      } else {
+        document.getElementById('start-pin-msg').textContent = '密碼錯誤，請重試';
+        startPinInput = '';
+        updatePinDots('start');
+      }
+    }
+
   </script>
   </div>
 </body>
