@@ -20,7 +20,7 @@ window.CANDIDATES_CONFIG = [
   {
     number: 4,
     className: "506",
-    mayor: { name: "張仲崴", zhuyin: ["ㄓㄤ", "ㄓㄨㄥˋ", "ㄨㄞ"], image: "photos/candidates/4-1.jpg" },
+    mayor: { name: "張仲崴", zhuyin: ["ㄓㄤ", "ㄓㄨㄥˋ", "ㄨㄟ"], image: "photos/candidates/4-1.jpg" },
     vice: { name: "李芷嫻", zhuyin: ["ㄌㄧˇ", "ㄓˇ", "ㄒㄧㄢˊ"], image: "photos/candidates/4-2.jpg" }
   },
   {
